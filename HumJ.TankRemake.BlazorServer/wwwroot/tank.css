@@ -1,0 +1,68 @@
+*:hover { outline: 1px solid red; }
+*:focus { outline: 1px solid blue; }
+.HitWithTank::after { content: ''; display: block; position: relative; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(255,0,0,0.5); z-index: 1000; }
+
+@media (max-width: 640px) {
+    #Playground #ControlKey { display: initial !important; }
+}
+
+body { background: black; user-select: none; }
+#Playground { position: absolute; left: 0; top: 0; width: 640px; overflow: visible; }
+    #Playground * { position: absolute; left: 0; top: 0; }
+
+    #Playground #StatusBar { left: 0; top: 0; width: 100%; height: 2em; line-height: 2em; color: white; display: flex; justify-content: space-between; flex-wrap: nowrap; }
+        #Playground #StatusBar * { position: static; }
+        #Playground #StatusBar #StageInformation { padding: 0 1em; }
+        #Playground #StatusBar #CanvasInformation { display: flex; }
+            #Playground #StatusBar #CanvasInformation * { padding-right: 1em; }
+
+    #Playground #Canvas { top: 2em; }
+
+    #Playground #ControlKey { display: none; width: 640px; height: 360px; left: 0; top: calc(480px + 2em); background: black; }
+    #Playground > #ControlKey > * { transform: rotate(45deg); border-radius: 25%; width: 64px; height: 64px; }
+        #Playground > #ControlKey > * > * { transform: rotate(-45deg); width: 100%; height: 100%; line-height: 56px; font-size: 1.25rem; color: white; text-shadow: 0 0 4px black; }
+    #Playground > #ControlKey > #ControlKey_Up { left: 160px; top: 64px; background-color: darkslateblue; }
+    #Playground > #ControlKey > #ControlKey_Down { left: 160px; top: 192px; background-color: darkslateblue; }
+    #Playground > #ControlKey > #ControlKey_Left { left: 96px; top: 128px; background-color: darkslateblue; }
+    #Playground > #ControlKey > #ControlKey_Right { left: 224px; top: 128px; background-color: darkslateblue; }
+    #Playground > #ControlKey > #ControlKey_A { left: 368px; top: 64px; background-color: darkkhaki; }
+    #Playground > #ControlKey > #ControlKey_B { left: 464px; top: 64px; background-color: darkkhaki; }
+    #Playground > #ControlKey > #ControlKey_C { left: 368px; top: 192px; background-color: darkolivegreen; }
+    #Playground > #ControlKey > #ControlKey_D { left: 464px; top: 192px; background-color: darkolivegreen; }
+
+    #Playground #Background { width: 640px; height: 480px; }
+
+    #Playground #BackgroundTile { }
+    #Playground #ShadowTile { filter: brightness(0) blur(4px); left: 6.4px; top: 4.8px; zoom: 0.98; }
+        #Playground #ShadowTile * { }
+        #Playground #ShadowTile .Bush { opacity: 0.5; }
+        #Playground #ShadowTile .Dust { opacity: 0.25; }
+    #Playground #ForegroundTile { }
+
+    #Playground .item { transition: left linear 0.025s,top linear 0.025s; left: attr(x px); top: attr(y px); background-position-x: attr(bgx px); background-position-y: attr(bgy px); }
+    #Playground .tile { width: 16px; height: 16px; background-image: url(Back.png); }
+        #Playground .tile.Terrain { z-index: 1; }
+        #Playground .tile.Building { z-index: 10; }
+        #Playground .tile.Cover { z-index: 100; }
+
+    #Playground #Tank { left: -16px; top: -16px; }
+    #Playground .tank { width: 32px; height: 32px; filter: drop-shadow(0 0 2px); z-index: 15 }
+        #Playground .tank::after { content: ''; position: absolute; width: 100%; height: 100%; z-index: 2; background-position-x: attr(bgx px); background-position-y: attr(bgy px); background-image: url(Tank.png); }
+        #Playground .tank::before { content: ''; position: absolute; width: 100%; height: 100%; z-index: 1; background-image: url(Tank_L.png); }
+        #Playground .tank.NoEnhance::before { background-image: none; }
+        #Playground .tank.Water::before { background-position-y: -0px; }
+        #Playground .tank.Ice::before { background-position-y: -32px; }
+        #Playground .tank.Shield::before { background-position-y: -64px; }
+        #Playground .tank.Memory::before { background-position-y: -96px; animation: Memory 1s steps(1) infinite; }
+        #Playground .tank.Up::before { background-position-x: -0px; }
+        #Playground .tank.Right::before { background-position-x: -32px; }
+        #Playground .tank.Down::before { background-position-x: -64px; }
+        #Playground .tank.Left::before { background-position-x: -96px; }
+
+@keyframes Memory {
+    0% { background-position-x: 0px; }
+    25% { background-position-x: -32px; }
+    50% { background-position-x: -64px; }
+    75% { background-position-x: -96px; }
+    100% { background-position-x: 0px; }
+}

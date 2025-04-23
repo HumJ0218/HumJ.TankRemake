@@ -1,0 +1,13 @@
+﻿@page "/"
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        var id = GameService.CreatePlayground();
+        NavigationManager.NavigateTo($"/Run/{id}");
+    }
+}
+
+<PageTitle>Loading...</PageTitle>

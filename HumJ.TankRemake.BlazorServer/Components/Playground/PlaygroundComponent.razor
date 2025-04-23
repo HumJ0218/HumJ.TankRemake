@@ -1,0 +1,204 @@
+﻿@using System.Drawing
+@using HumJ.TankRemake.GameCore.MapStage.Tile
+@using HumJ.TankRemake.GameCore.Tank
+
+@implements IDisposable
+
+@inject IJSRuntime JSRuntime
+@inject ILogger<PlaygroundComponent> logger
+
+@code {
+    [Parameter] public Playground? Playground { get; set; }
+    [Parameter] public int StageIndex { get; set; }
+
+    protected override bool ShouldRender() => shouldRender;
+    private bool shouldRender = true;
+
+
+    private readonly Dictionary<string, TankControl> ControlKeyMap = new()
+    {
+        { "w", TankControl.Up },
+        { "s", TankControl.Down },
+        { "a", TankControl.Left },
+        { "d", TankControl.Right },
+        { "u", TankControl.PrimaryFire },
+        { "i", TankControl.SecondaryFire },
+    };
+
+    private Timer? counterTimer;
+
+    private int fps;
+    private int tps;
+    private int bpsTx;
+    private int bpsRx;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        logger.LogDebug(nameof(OnParametersSetAsync));
+
+        await base.OnParametersSetAsync();
+
+        Playground?.Start(StageIndex);
+    }
+
+    private int renderCount = 0;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        logger.LogDebug($"{nameof(OnAfterRenderAsync)} {firstRender} {renderCount}");
+
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender && Playground is not null)
+        {
+            Playground.OnTick += OnTick;
+
+            var lastRenderCount = 0;
+            var lastTick = Playground.Tick;
+            counterTimer = new Timer(async state =>
+            {
+                try
+                {
+                    fps = renderCount - lastRenderCount;
+                    lastRenderCount = renderCount;
+
+                    tps = Playground.Tick - lastTick;
+                    lastTick = Playground.Tick;
+
+                    var blazorTraffic = await JSRuntime.InvokeAsync<double[]>("window.getBlazorTraffic");
+                    (bpsTx, bpsRx) = ((int)blazorTraffic[0], (int)blazorTraffic[1]);
+
+                    shouldRender = true;
+                    _ = InvokeAsync(StateHasChanged);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, nameof(counterTimer));
+                }
+            }, null, 1000, 1000);
+        }
+
+        renderCount++;
+    }
+
+    public void Dispose()
+    {
+        logger.LogDebug(nameof(Dispose));
+
+        if (Playground is not null)
+        {
+            Playground.OnTick -= OnTick;
+            Playground?.Stop();
+        }
+
+        counterTimer?.Dispose();
+        counterTimer = null;
+    }
+
+    private void OnTick(object? sender, EventArgs args)
+    {
+        shouldRender = true;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task PauseAsync(bool enabled)
+    {
+        logger.LogDebug($"{nameof(PauseAsync)} {enabled}");
+
+        await Task.CompletedTask;
+
+        if (Playground is null)
+        {
+            return;
+        }
+
+        Playground.Pause(enabled);
+
+        shouldRender = true;
+    }
+
+    private async Task KeyAsync(KeyboardEventArgs eventArgs)
+    {
+        logger.LogDebug($"{nameof(KeyAsync)} {eventArgs.Key} {eventArgs.Type}");
+
+        await Task.CompletedTask;
+
+        if (Playground?.PlayerTank is not null && ControlKeyMap.TryGetValue(eventArgs.Key, out var controlKey))
+        {
+            var enabled = eventArgs.Type == "keydown";
+            Playground.PlayerTank[controlKey] = enabled;
+        }
+
+        shouldRender = false;
+    }
+
+    private async Task KeyAsync(bool enabled, TankControl key)
+    {
+        logger.LogDebug($"{nameof(KeyAsync)} {key} {enabled}");
+
+        await Task.CompletedTask;
+
+        if (Playground?.PlayerTank is not null)
+        {
+            Playground.PlayerTank[key] = enabled;
+        }
+
+        shouldRender = false;
+    }
+}
+
+@if (Playground is not null)
+{
+    <div id="Playground" data-tick="@(Playground.Tick)">
+        <div id="Canvas" tabindex="-1" @onfocus="ev=>PauseAsync(false)" @onblur="ev=>PauseAsync(true)" @onkeydown="ev=>KeyAsync(ev)" @onkeyup="ev=>KeyAsync(ev)">
+            <div id="Background" style="background-color:@($"rgb({Playground.BackgroundColor.R},{Playground.BackgroundColor.G},{Playground.BackgroundColor.B})");background-image:url(@(Playground.BackgroundImage));"></div>
+            <div id="BackgroundTile">
+                @foreach (var tile in Playground.BackgroundTile)
+                {
+                    <div class="item tile @(tile.GetType().Name) @(tile.Layer) @(tile.HitWithTank?"HitWithTank":"")" x="@(tile.Position.X)" y="@(tile.Position.Y)" bgx="-@(tile[Playground.Tick]?.StartX)" bgy="-@(tile[Playground.Tick]?.StartY)"></div>
+                }
+            </div>
+            <div id="ShadowTile">
+                @foreach (var tile in Playground.ForegroundTile)
+                {
+                    <div class="item tile @(tile.GetType().Name) @(tile.Layer)" x="@(tile.Position.X)" y="@(tile.Position.Y)" bgx="-@(tile[Playground.Tick]?.StartX)" bgy="-@(tile[Playground.Tick]?.StartY)"></div>
+                }
+            </div>
+            <div id="Tank">
+                @if (Playground.PlayerTank is not null)
+                {
+                    <div class="item tank @(Playground.PlayerTank.GetType().Name) @(Playground.PlayerTank.Type) @(Playground.PlayerTank.Enhance) @(Playground.PlayerTank.Direction)" x="@(Playground.PlayerTank.Position.X)" y="@(Playground.PlayerTank.Position.Y)" bgx="-@(Playground.PlayerTank[Playground.Tick]?.StartX)" bgy="-@(Playground.PlayerTank[Playground.Tick]?.StartY)"></div>
+                }
+            </div>
+            <div id="ForegroundTile">
+                @foreach (var tile in Playground.ForegroundTile)
+                {
+                    <div class="item tile @(tile.GetType().Name) @(tile.Layer) @(tile.HitWithTank?"HitWithTank":"")" x="@(tile.Position.X)" y="@(tile.Position.Y)" bgx="-@(tile[Playground.Tick]?.StartX)" bgy="-@(tile[Playground.Tick]?.StartY)"></div>
+                }
+            </div>
+        </div>
+
+        <div id="StatusBar">
+            @{
+                var title = $"[{Playground.StageDifficulty}] Stage {(Playground.StageIndex + 1):D2} - {Playground.StageName}";
+            }
+            <PageTitle>@(title)</PageTitle>
+            <div id="StageInformation">@(title)</div>
+            <div id="CanvasInformation">
+                <span>FPS:@(fps)</span>
+                <span>TPS:@(tps)</span>
+                <span>BPS:@(bpsTx)T,@(bpsRx)R</span>
+            </div>
+        </div>
+
+        <div id="ControlKey">
+            <button id="ControlKey_Up" @ontouchstart="ev=>KeyAsync(true,TankControl.Up)" @ontouchend="ev=>KeyAsync(false,TankControl.Up)"><span>Up</span></button>
+            <button id="ControlKey_Down" @ontouchstart="ev=>KeyAsync(true,TankControl.Down)" @ontouchend="ev=>KeyAsync(false,TankControl.Down)"><span>Down</span></button>
+            <button id="ControlKey_Left" @ontouchstart="ev=>KeyAsync(true,TankControl.Left)" @ontouchend="ev=>KeyAsync(false,TankControl.Left)"><span>Left</span></button>
+            <button id="ControlKey_Right" @ontouchstart="ev=>KeyAsync(true,TankControl.Right)" @ontouchend="ev=>KeyAsync(false,TankControl.Right)"><span>Right</span></button>
+            <button id="ControlKey_A" @ontouchstart="ev=>KeyAsync(true,TankControl.PrimaryFire)" @ontouchend="ev=>KeyAsync(false,TankControl.PrimaryFire)"><span>A</span></button>
+            <button id="ControlKey_B" @ontouchstart="ev=>KeyAsync(true,TankControl.SecondaryFire)" @ontouchend="ev=>KeyAsync(false,TankControl.SecondaryFire)"><span>B</span></button>
+            <button id="ControlKey_C" @onclick="ev=>Playground.Pause(false)"><span>Play</span></button>
+            <button id="ControlKey_D" @onclick="ev=>Playground.Pause(true)"><span>Pause</span></button>
+        </div>
+    </div>
+}

@@ -1,0 +1,39 @@
+﻿@page "/Run/{Id}"
+@page "/Run/{Id}/{Index}"
+
+@inject GameService GameService
+
+@code {
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Index { get; set; }
+
+    private Playground? playground;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            playground = GameService.GetPlayground(Guid.TryParse(Id, out var __id) ? __id : Guid.Empty);
+
+            _ = InvokeAsync(StateHasChanged);
+        }
+    }
+}
+
+<link href="tank.css" rel="stylesheet" />
+
+<PageTitle>Playground @(Id)</PageTitle>
+@if (playground == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    var index = int.TryParse(Index, out var __index) ? __index : 0;
+    <PlaygroundComponent Playground="playground" StageIndex="index" />
+
+    @* <a href="@($"/Run/{Id}/{index-1}")">prev</a> *@
+    @* <a href="@($"/Run/{Id}/{index+1}")">next</a> *@
+}

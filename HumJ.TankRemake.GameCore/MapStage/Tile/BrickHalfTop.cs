@@ -1,0 +1,7 @@
+﻿namespace HumJ.TankRemake.GameCore.MapStage.Tile
+{
+    public class BrickHalfTop(int gridX, int gridY, int variant) : TileBase(gridX, gridY, 1, 12, 2, variant, false)
+    {
+        public override TileLayer Layer { get; } = TileLayer.Building;
+    }
+}

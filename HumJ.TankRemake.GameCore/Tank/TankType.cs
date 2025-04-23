@@ -1,0 +1,34 @@
+﻿namespace HumJ.TankRemake.GameCore.Tank
+{
+    public enum TankType
+    {
+        Player1,
+        Player1e,
+        Player2,
+        Player2e,
+        EnemyNormal1,
+        EnemyNormal1e,
+        EnemyNormal2,
+        EnemyNormal2e,
+        EnemyRapid1,
+        EnemyRapid1e,
+        EnemyRapid2,
+        EnemyRapid2e,
+        EnemyFire1,
+        EnemyFire1e,
+        EnemyFire2,
+        EnemyFire2e,
+        EnemyAp1,
+        EnemyAp1e,
+        EnemyAp2,
+        EnemyAp2e,
+        EnemyHe1,
+        EnemyHe1e,
+        EnemyHe2,
+        EnemyHe2e,
+        EnemyMine1,
+        EnemyMine1e,
+        EnemyMine2,
+        EnemyMine2e,
+    }
+}
