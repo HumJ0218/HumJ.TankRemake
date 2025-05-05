@@ -138,7 +138,7 @@ namespace HumJ.TankRemake.GameCore.Tank
                 var speedLength = Speed.Length();
                 if (speedLength > 0)
                 {
-                    var resistance = (float)(onIce ? 0.25 : 2);
+                    var resistance = (float)(onIce ? 0.25 : 4);
                     var newSpeedLength = speedLength - resistance;
                     if (newSpeedLength < 0) newSpeedLength = 0;
                     Speed = Vector2.Normalize(Speed) * newSpeedLength;
