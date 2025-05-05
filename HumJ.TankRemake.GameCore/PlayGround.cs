@@ -1,6 +1,7 @@
 ﻿using HumJ.TankRemake.GameCore.MapStage.Map;
 using HumJ.TankRemake.GameCore.MapStage.Tile;
 using HumJ.TankRemake.GameCore.Tank;
+using HumJ.TankRemake.GameCore.Weapon;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Drawing;
@@ -26,6 +27,8 @@ namespace HumJ.TankRemake.GameCore
 
         public ConcurrentBag<TankBase> EnemyTank { get; } = [];
         public TankBase? PlayerTank { get; private set; }
+
+        public ConcurrentBag<BulletBase> Bullet { get; } = [];
 
         public event EventHandler? OnTick;
 
@@ -110,21 +113,52 @@ namespace HumJ.TankRemake.GameCore
             StageInterval = TimeSpan.FromMilliseconds(1000.0 / tps);
             timer = new Timer(state =>
             {
-                logger.LogTrace($"{nameof(StartGameTick)} {nameof(timer)} {Tick}");
-
-                try
-                {
-                    Tick++;
-
-                    PlayerTank?.GoTick(this);
-
-                    OnTick?.Invoke(this, EventArgs.Empty);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+                GoTick();
             }, null, 0, 0);
+        }
+
+        private void GoTick()
+        {
+            logger.LogTrace($"{nameof(GoTick)} {Tick}");
+
+            try
+            {
+                Tick++;
+
+                // 玩家
+                PlayerTank?.GoTick(this);
+
+                // 敌人
+
+                // 子弹
+                {
+                    var removed = new List<BulletBase>();
+                    foreach (var bullet in Bullet)
+                    {
+                        bullet.GoTick(this);
+                        if (bullet.TimeToLive < 0)
+                        {
+                            removed.Add(bullet);
+                        }
+                    }
+
+                    if (removed.Count > 0)
+                    {
+                        var lived = Bullet.Except(removed).ToArray();
+                        Bullet.Clear();
+                        foreach (var b in lived)
+                        {
+                            Bullet.Add(b);
+                        }
+                    }
+                }
+
+                OnTick?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }

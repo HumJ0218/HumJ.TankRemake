@@ -2,12 +2,12 @@
 {
     public enum WeaponType
     {
-        None = 0,
-        Primary = 1,
-        Rapid = 50,
-        Fire = 30,
-        Ap = 10,
-        He = 20,
-        Mine = 15,
+        Dummy = 0,
+        Normal = 1,
+        Rapid = 2,
+        Fire = 3,
+        Ap = 4,
+        Explosion = 5,
+        Mine = 6,
     }
 }

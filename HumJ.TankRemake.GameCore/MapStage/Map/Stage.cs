@@ -88,8 +88,8 @@ namespace HumJ.TankRemake.GameCore.MapStage.Map
 
         private static Stage Parse(Span<byte> bytes)
         {
-            var Caption = Encoding.ASCII.GetString(bytes.Slice(1, 63)).TrimEnd('\0');
-            var BG_Bitmap = Encoding.ASCII.GetString(bytes.Slice(65, 63)).TrimEnd('\0');
+            var Caption = Encoding.UTF8.GetString(bytes.Slice(1, 63)).TrimEnd('\0').Replace('�',' ');
+            var BG_Bitmap = Encoding.UTF8.GetString(bytes.Slice(65, 63)).TrimEnd('\0').Replace('�', ' ');
             var BG_Color = Color.FromArgb(bytes[128], bytes[129], bytes[130]);
             var BG_H_Tile = bytes[132] != 0;
             var BG_V_Tile = bytes[133] != 0;
@@ -97,7 +97,7 @@ namespace HumJ.TankRemake.GameCore.MapStage.Map
             var SpecialOpt = bytes[212] + bytes[213] * 256;
             var EnemyCount = ParseEnemyCount(bytes.Slice(144, 48));
             var MaxCount = bytes[208] + bytes[209] * 256;
-            var SI_Bitmap = Encoding.ASCII.GetString(bytes.Slice(225, 63)).TrimEnd('\0');
+            var SI_Bitmap = Encoding.UTF8.GetString(bytes.Slice(225, 63)).TrimEnd('\0').Replace('�', ' ');
             var BackgroundTile = ParseTile(bytes.Slice(1200, 2400));
             var ForeGroundTile = ParseTile(bytes.Slice(3600, 2400));
 

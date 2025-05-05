@@ -7,12 +7,11 @@ using System.Numerics;
 
 namespace HumJ.TankRemake.GameCore.Tank
 {
-    public abstract class TankBase(ILogger<TankBase> logger) : IHaveTexture, ICanGoTick, IHaveControl<TankControl>, IHaveHitBox
+    public abstract class TankBase(ILogger<TankBase> logger) : ICanGoTick, IHaveControl<TankControl>, IHaveHitBox
     {
         public const int GridSize = 16;
         public static readonly RectangleF MoveBound = new(GridSize, GridSize, GridSize * 38, GridSize * 28);
 
-        public Texture? this[int tick] => Texture.Tank[(int)Direction + (Injured ? 4 : 0)][(int)Type];
         public bool this[TankControl control]
         {
             get => this.control[control];
@@ -24,10 +23,10 @@ namespace HumJ.TankRemake.GameCore.Tank
                 {
                     switch (control)
                     {
-                        case TankControl.Up: Direction = TankDirection.Up; break;
-                        case TankControl.Right: Direction = TankDirection.Right; break;
-                        case TankControl.Down: Direction = TankDirection.Down; break;
-                        case TankControl.Left: Direction = TankDirection.Left; break;
+                        case TankControl.Up: Direction = EntityDirection.Up; break;
+                        case TankControl.Right: Direction = EntityDirection.Right; break;
+                        case TankControl.Down: Direction = EntityDirection.Down; break;
+                        case TankControl.Left: Direction = EntityDirection.Left; break;
                         case TankControl.PrimaryFire: break;
                         case TankControl.SecondaryFire: break;
                     }
@@ -36,14 +35,17 @@ namespace HumJ.TankRemake.GameCore.Tank
         }
 
         public Vector2 Position { get; protected set; }
-        public TankDirection Direction { get; protected set; }
+        public EntityDirection Direction { get; protected set; }
         public Vector2 Speed { get; protected set; }
         public RectangleF HitBox => new(Position.X - GridSize, Position.Y - GridSize, GridSize * 2, GridSize * 2);
-        public abstract TankCamp Camp { get; }
+        public abstract Camp Camp { get; }
+
+        public bool HitWithBullet { get; private set; }
 
         public abstract bool Injured { get; }
         public abstract TankType Type { get; }
-        public abstract WeaponBase SecondaryWeapon { get; }
+        public virtual WeaponBase PrimaryWeapon { get; protected set; }
+        public virtual WeaponBase SecondaryWeapon { get; protected set; }
 
         public abstract int MaxHealthCount { get; }
         public abstract int MaxAmmoCount { get; }
@@ -74,6 +76,7 @@ namespace HumJ.TankRemake.GameCore.Tank
             logger.LogDebug($"{nameof(GoTick)}");
 
             ProcessMove(playground);
+            ProcessFire(playground);
         }
 
         private void ProcessMove(Playground playground)
@@ -116,6 +119,33 @@ namespace HumJ.TankRemake.GameCore.Tank
             }
         }
 
+        private void ProcessFire(Playground playground)
+        {
+            if (this[TankControl.PrimaryFire])
+            {
+                var bullets = PrimaryWeapon.Fire(this, playground);
+                foreach (var bullet in bullets)
+                {
+                    playground.Bullet.Add(bullet);
+                }
+            }
+
+            if (this[TankControl.SecondaryFire])
+            {
+                var bullets = SecondaryWeapon.Fire(this, playground);
+                foreach (var bullet in bullets)
+                {
+                    playground.Bullet.Add(bullet);
+                }
+            }
+        }
+
+        public virtual bool HitWith(BulletBase bullet)
+        {
+            HitWithBullet = HitBox.IntersectsWith(bullet.HitBox) && bullet.Camp != Camp;
+            return HitWithBullet;
+        }
+
         void TryMove(Playground playground)
         {
             var ice = playground.BackgroundTile.Where(m => m is Ice).Cast<Ice>().Where(m => m.OnIce(this)).ToArray();
@@ -126,10 +156,10 @@ namespace HumJ.TankRemake.GameCore.Tank
             var speedUp = false;
             {
                 var power = (float)(SpeedLevel * 2 * (onIce ? 0.1 : 1));
-                if (this[TankControl.Up] && (Speed == Vector2.Zero || (Speed.Y < 0 && Direction == TankDirection.Up))) { Speed += new Vector2(0, -1) * power; speedUp = true; }
-                if (this[TankControl.Right] && (Speed == Vector2.Zero || (Speed.X > 0 && Direction == TankDirection.Right))) { Speed += new Vector2(1, 0) * power; speedUp = true; }
-                if (this[TankControl.Down] && (Speed == Vector2.Zero || (Speed.Y > 0 && Direction == TankDirection.Down))) { Speed += new Vector2(0, 1) * power; speedUp = true; }
-                if (this[TankControl.Left] && (Speed == Vector2.Zero || (Speed.X < 0 && Direction == TankDirection.Left))) { Speed += new Vector2(-1, 0) * power; speedUp = true; }
+                if (this[TankControl.Up] && (Speed == Vector2.Zero || (Speed.Y < 0 && Direction == EntityDirection.Up))) { Speed += new Vector2(0, -1) * power; speedUp = true; }
+                if (this[TankControl.Right] && (Speed == Vector2.Zero || (Speed.X > 0 && Direction == EntityDirection.Right))) { Speed += new Vector2(1, 0) * power; speedUp = true; }
+                if (this[TankControl.Down] && (Speed == Vector2.Zero || (Speed.Y > 0 && Direction == EntityDirection.Down))) { Speed += new Vector2(0, 1) * power; speedUp = true; }
+                if (this[TankControl.Left] && (Speed == Vector2.Zero || (Speed.X < 0 && Direction == EntityDirection.Left))) { Speed += new Vector2(-1, 0) * power; speedUp = true; }
             }
 
             // 阻力

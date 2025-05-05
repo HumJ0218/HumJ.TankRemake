@@ -1,6 +1,8 @@
 *:hover { outline: 1px solid red; }
 *:focus { outline: 1px solid blue; }
+
 .HitWithTank::after { content: ''; display: block; position: relative; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(255,0,0,0.5); z-index: 1000; }
+.HitWithBullet::after { content: ''; display: block; position: relative; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,255,0,0.5); z-index: 1000; }
 
 @media (max-width: 640px) {
     #Playground #ControlKey { display: initial !important; }
@@ -10,13 +12,14 @@ body { background: black; user-select: none; }
 #Playground { position: absolute; left: 0; top: 0; width: 640px; overflow: visible; }
     #Playground * { position: absolute; left: 0; top: 0; }
 
-    #Playground #StatusBar { left: 0; top: 0; width: 100%; height: 2em; line-height: 2em; color: white; display: flex; justify-content: space-between; flex-wrap: nowrap; }
-        #Playground #StatusBar * { position: static; }
-        #Playground #StatusBar #StageInformation { padding: 0 1em; }
-        #Playground #StatusBar #CanvasInformation { display: flex; }
-            #Playground #StatusBar #CanvasInformation * { padding-right: 1em; }
+    #Playground #StatusBar { left: 0; top: 0; width: 100%; line-height: 2rem; color: white; }
+        #Playground #StatusBar #StageInformation { left: 1rem; top: 0;}
+        #Playground #StatusBar #CanvasInformation { right: 0; top: 0.25rem; text-align: right; font-size: 0.5rem;line-height:0.75rem; }
+            #Playground #StatusBar #CanvasInformation * { position: static; padding-right: 1rem; display: inline-block; width: 3rem; text-align: left; }
+        #Playground #StatusBar #PlayerInformation { left: 0; top: calc(480px + 2rem);width:100%;display:flex; }
+            #Playground #StatusBar #PlayerInformation * { position: static; padding-left:1rem;}
 
-    #Playground #Canvas { top: 2em; }
+    #Playground #Canvas { top: 2rem; }
 
     #Playground #ControlKey { display: none; width: 640px; height: 360px; left: 0; top: calc(480px + 2em); background: black; }
     #Playground > #ControlKey > * { transform: rotate(45deg); border-radius: 25%; width: 64px; height: 64px; }
@@ -39,30 +42,179 @@ body { background: black; user-select: none; }
         #Playground #ShadowTile .Dust { opacity: 0.25; }
     #Playground #ForegroundTile { }
 
-    #Playground .item { transition: left linear 0.025s,top linear 0.025s; left: attr(x px); top: attr(y px); background-position-x: attr(bgx px); background-position-y: attr(bgy px); }
+    #Playground .item { transition: left linear 0.025s,top linear 0.025s; left: attr(x px); top: attr(y px); }
     #Playground .tile { width: 16px; height: 16px; background-image: url(Back.png); }
         #Playground .tile.Terrain { z-index: 1; }
         #Playground .tile.Building { z-index: 10; }
         #Playground .tile.Cover { z-index: 100; }
 
-    #Playground #Tank { left: -16px; top: -16px; }
+    #Playground .bullet { z-index: 200; }
+        #Playground .bullet.BulletNormalGun { width: 16px; height: 16px; transform: translate(-8px, -8px); background-image: url(B_Normal.png); }
+            #Playground .bullet.BulletNormalGun.Up { background-position-x: -0px; }
+            #Playground .bullet.BulletNormalGun.Right { background-position-x: -32px; }
+            #Playground .bullet.BulletNormalGun.Down { background-position-x: -64px; }
+            #Playground .bullet.BulletNormalGun.Left { background-position-x: -96px; }
+        #Playground .bullet.BulletRapidGun { width: 16px; height: 16px; transform: translate(-8px, -8px); background-image: url(B_Repid.png); }
+            #Playground .bullet.BulletRapidGun.Up { background-position-x: -0px; }
+            #Playground .bullet.BulletRapidGun.Right { background-position-x: -32px; }
+            #Playground .bullet.BulletRapidGun.Down { background-position-x: -64px; }
+            #Playground .bullet.BulletRapidGun.Left { background-position-x: -96px; }
+
+  #Playground #Tank { left: -16px; top: -16px; }
     #Playground .tank { width: 32px; height: 32px; filter: drop-shadow(0 0 2px); z-index: 15 }
-        #Playground .tank::after { content: ''; position: absolute; width: 100%; height: 100%; z-index: 2; background-position-x: attr(bgx px); background-position-y: attr(bgy px); background-image: url(Tank.png); }
         #Playground .tank::before { content: ''; position: absolute; width: 100%; height: 100%; z-index: 1; background-image: url(Tank_L.png); }
         #Playground .tank.NoEnhance::before { background-image: none; }
         #Playground .tank.Water::before { background-position-y: -0px; }
         #Playground .tank.Ice::before { background-position-y: -32px; }
         #Playground .tank.Shield::before { background-position-y: -64px; }
-        #Playground .tank.Memory::before { background-position-y: -96px; animation: Memory 1s steps(1) infinite; }
-        #Playground .tank.Up::before { background-position-x: -0px; }
-        #Playground .tank.Right::before { background-position-x: -32px; }
-        #Playground .tank.Down::before { background-position-x: -64px; }
-        #Playground .tank.Left::before { background-position-x: -96px; }
+        #Playground .tank.Memory::before { background-position-y: -96px; animation: EnhanceMemory 1s steps(1) infinite; }
+        #Playground .tank::after { content: ''; position: absolute; width: 100%; height: 100%; z-index: 2; background-image: url(Tank.png); }
+        #Playground .tank.Player1::after { background-position-x: -0px; }
+        #Playground .tank.Player1e::after { background-position-x: -32px; }
+        #Playground .tank.Player2::after { background-position-x: -64px; }
+        #Playground .tank.Player2e::after { background-position-x: -96px; }
+        #Playground .tank.EnemyNormal1::after { background-position-x: -128px; }
+        #Playground .tank.EnemyNormal1e::after { background-position-x: -160px; }
+        #Playground .tank.EnemyNormal2::after { background-position-x: -192px; }
+        #Playground .tank.EnemyNormal2e::after { background-position-x: -224px; }
+        #Playground .tank.EnemyRapid1::after { background-position-x: -256px; }
+        #Playground .tank.EnemyRapid1e::after { background-position-x: -288px; }
+        #Playground .tank.EnemyRapid2::after { background-position-x: -320px; }
+        #Playground .tank.EnemyRapid2e::after { background-position-x: -352px; }
+        #Playground .tank.EnemyFire1::after { background-position-x: -384px; }
+        #Playground .tank.EnemyFire1e::after { background-position-x: -416px; }
+        #Playground .tank.EnemyFire2::after { background-position-x: -448px; }
+        #Playground .tank.EnemyFire2e::after { background-position-x: -480px; }
+        #Playground .tank.EnemyAp1::after { background-position-x: -512px; }
+        #Playground .tank.EnemyAp1e::after { background-position-x: -544px; }
+        #Playground .tank.EnemyAp2::after { background-position-x: -576px; }
+        #Playground .tank.EnemyAp2e::after { background-position-x: -608px; }
+        #Playground .tank.EnemyHe1::after { background-position-x: -640px; }
+        #Playground .tank.EnemyHe1e::after { background-position-x: -672px; }
+        #Playground .tank.EnemyHe2::after { background-position-x: -704px; }
+        #Playground .tank.EnemyHe2e::after { background-position-x: -736px; }
+        #Playground .tank.EnemyMine1::after { background-position-x: -768px; }
+        #Playground .tank.EnemyMine1e::after { background-position-x: -800px; }
+        #Playground .tank.EnemyMine2::after { background-position-x: -832px; }
+        #Playground .tank.EnemyMine2e::after { background-position-x: -864px; }
+        #Playground .tank.Up::after { background-position-y: -0px; }
+        #Playground .tank.Right::after { background-position-y: -32px; }
+        #Playground .tank.Down::after { background-position-y: -64px; }
+        #Playground .tank.Left::after { background-position-y: -96px; }
 
-@keyframes Memory {
+@keyframes EnhanceMemory {
     0% { background-position-x: 0px; }
     25% { background-position-x: -32px; }
     50% { background-position-x: -64px; }
     75% { background-position-x: -96px; }
     100% { background-position-x: 0px; }
+}
+
+#Playground .tile.Ice { background-position-y: -0px; animation: TileIce 4s steps(1) infinite; }
+    #Playground .tile.Ice.v0 { animation-delay: -0s; }
+    #Playground .tile.Ice.v1 { animation-delay: -1s; }
+    #Playground .tile.Ice.v2 { animation-delay: -2s; }
+    #Playground .tile.Ice.v3 { animation-delay: -3s; }
+
+#Playground .tile.Water {  background-position-y: -0px; animation: TileWater 4s steps(1) infinite; }
+    #Playground .tile.Water.v0 { animation-delay: -0s; }
+    #Playground .tile.Water.v1 { animation-delay: -1s; }
+    #Playground .tile.Water.v2 { animation-delay: -2s; }
+    #Playground .tile.Water.v3 { animation-delay: -3s; }
+
+#Playground .tile.Bush { background-position-y: -0px; }
+    #Playground .tile.Bush.v0 { background-position-x: -128px; }
+    #Playground .tile.Bush.v1 { background-position-x: -144px; }
+    #Playground .tile.Bush.v2 { background-position-x: -160px; }
+    #Playground .tile.Bush.v3 { background-position-x: -176px; }
+
+#Playground .tile.Dust { background-position-y: -0px; }
+    #Playground .tile.Dust.v0 { background-position-x: -192px; }
+    #Playground .tile.Dust.v1 { background-position-x: -208px; }
+    #Playground .tile.Dust.v2 { background-position-x: -224px; }
+    #Playground .tile.Dust.v3 { background-position-x: -240px; }
+
+#Playground .tile.BrickFull { background-position-y: -16px; }
+    #Playground .tile.BrickFull.v0 { background-position-x: -128px; }
+    #Playground .tile.BrickFull.v1 { background-position-x: -144px; }
+    #Playground .tile.BrickFull.v2 { background-position-x: -160px; }
+    #Playground .tile.BrickFull.v3 { background-position-x: -176px; }
+
+#Playground .tile.BrickHalfTop { background-position-y: -16px; }
+    #Playground .tile.BrickHalfTop.v0 { background-position-x: -192px; }
+    #Playground .tile.BrickHalfTop.v1 { background-position-x: -208px; }
+
+#Playground .tile.BrickHalfRight { background-position-y: -16px; }
+    #Playground .tile.BrickHalfRight.v0 { background-position-x: -224px; }
+    #Playground .tile.BrickHalfRight.v1 { background-position-x: -240px; }
+
+#Playground .tile.BrickHalfBottom { background-position-y: -32px; }
+    #Playground .tile.BrickHalfBottom.v0 { background-position-x: -0px; }
+    #Playground .tile.BrickHalfBottom.v1 { background-position-x: -16px; }
+
+#Playground .tile.BrickHalfLeft { background-position-y: -32px; }
+    #Playground .tile.BrickHalfLeft.v0 { background-position-x: -32px; }
+    #Playground .tile.BrickHalfLeft.v1 { background-position-x: -48px; }
+
+#Playground .tile.BrickQuarterTopLeft { background-position-x: -64px; background-position-y: -32px; }
+#Playground .tile.BrickQuarterTopRight { background-position-x: -80px; background-position-y: -32px; }
+#Playground .tile.BrickQuarterBottomRight { background-position-x: -96px; background-position-y: -32px; }
+#Playground .tile.BrickQuarterBottomLeft { background-position-x: -112px; background-position-y: -32px; }
+
+#Playground .tile.Concrete4 { background-position-y: -32px; }
+    #Playground .tile.Concrete4.v0 { background-position-x: -128px; }
+    #Playground .tile.Concrete4.v1 { background-position-x: -144px; }
+    #Playground .tile.Concrete4.v2 { background-position-x: -160px; }
+    #Playground .tile.Concrete4.v3 { background-position-x: -176px; }
+
+#Playground .tile.Concrete3 { background-position-y: -32px; }
+    #Playground .tile.Concrete3.v0 { background-position-x: -192px; }
+    #Playground .tile.Concrete3.v1 { background-position-x: -208px; }
+    #Playground .tile.Concrete3.v2 { background-position-x: -224px; }
+    #Playground .tile.Concrete3.v3 { background-position-x: -240px; }
+
+#Playground .tile.Concrete2 { background-position-y: -48px; }
+    #Playground .tile.Concrete2.v0 { background-position-x: -0px; }
+    #Playground .tile.Concrete2.v1 { background-position-x: -16px; }
+    #Playground .tile.Concrete2.v2 { background-position-x: -32px; }
+    #Playground .tile.Concrete2.v3 { background-position-x: -48px; }
+
+#Playground .tile.Concrete1 { background-position-y: -48px; }
+    #Playground .tile.Concrete1.v0 { background-position-x: -64px; }
+    #Playground .tile.Concrete1.v1 { background-position-x: -80px; }
+    #Playground .tile.Concrete1.v2 { background-position-x: -96px; }
+    #Playground .tile.Concrete1.v3 { background-position-x: -112px; }
+
+#Playground .tile.Iron { background-position-y: -48px; }
+    #Playground .tile.Iron.v0 { background-position-x: -128px; }
+    #Playground .tile.Iron.v1 { background-position-x: -144px; }
+    #Playground .tile.Iron.v2 { background-position-x: -160px; }
+    #Playground .tile.Iron.v3 { background-position-x: -176px; }
+
+#Playground .tile.Crystal { background-position-y: -48px; animation: TileCrystal 4s steps(1) infinite; }
+    #Playground .tile.Crystal.v0 { animation-delay: -0s; }
+    #Playground .tile.Crystal.v1 { animation-delay: -1s; }
+    #Playground .tile.Crystal.v2 { animation-delay: -2s; }
+    #Playground .tile.Crystal.v3 { animation-delay: -3s; }
+
+
+@keyframes TileIce {
+    0% { background-position-x:  -0px;   }
+    25% { background-position-x: -16px; }
+    50% { background-position-x: -32px; }
+    75% { background-position-x: -48px; }
+}
+
+@keyframes TileWater {
+    0% { background-position-x: -64px; }
+    25% { background-position-x: -80px; }
+    50% { background-position-x: -96px; }
+    75% { background-position-x: -112px; }
+}
+
+@keyframes TileCrystal {
+    0% { background-position-x: -192px; }
+    25% { background-position-x: -208px; }
+    50% { background-position-x: -224px; }
+    75% { background-position-x: -240px; }
 }

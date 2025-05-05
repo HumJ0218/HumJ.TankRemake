@@ -1,6 +1,6 @@
 ﻿namespace HumJ.TankRemake.GameCore.Tank
 {
-    public enum TankDirection
+    public enum EntityDirection
     {
         Up,
         Right,

@@ -2,7 +2,7 @@
 
 namespace HumJ.TankRemake.GameCore.MapStage.Tile
 {
-    public class Water(int gridX, int gridY, int variant) : TileBase(gridX, gridY, 0, 4, 4, variant, true)
+    public class Water(int gridX, int gridY, int variant) : TileBase(gridX, gridY, variant)
     {
         public override TileLayer Layer { get; } = TileLayer.Terrain;
 

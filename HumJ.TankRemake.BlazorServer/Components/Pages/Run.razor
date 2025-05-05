@@ -34,6 +34,8 @@ else
     var index = int.TryParse(Index, out var __index) ? __index : 0;
     <PlaygroundComponent Playground="playground" StageIndex="index" />
 
-    @* <a href="@($"/Run/{Id}/{index-1}")">prev</a> *@
-    @* <a href="@($"/Run/{Id}/{index+1}")">next</a> *@
+    <div style="position:absolute;right:0;top:0;">
+        <a href="@($"/Run/{Id}/{index-1}")">prev</a>
+        <a href="@($"/Run/{Id}/{index+1}")">next</a>
+    </div>
 }

@@ -2,7 +2,7 @@
 
 namespace HumJ.TankRemake.GameCore.MapStage.Tile
 {
-    public class Dust(int gridX, int gridY, int variant) : TileBase(gridX, gridY, 0, 12, 4, variant, false)
+    public class Dust(int gridX, int gridY, int variant) : TileBase(gridX, gridY, variant)
     {
         public override TileLayer Layer { get; } = TileLayer.Cover;
 

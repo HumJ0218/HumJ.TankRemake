@@ -154,25 +154,31 @@
             <div id="BackgroundTile">
                 @foreach (var tile in Playground.BackgroundTile)
                 {
-                    <div class="item tile @(tile.GetType().Name) @(tile.Layer) @(tile.HitWithTank?"HitWithTank":"")" x="@(tile.Position.X)" y="@(tile.Position.Y)" bgx="-@(tile[Playground.Tick]?.StartX)" bgy="-@(tile[Playground.Tick]?.StartY)"></div>
+                    <div @key="tile" class="item tile @(tile.GetType().Name) v@(tile.Variant) @(tile.Layer) @(tile.HitWithTank?"HitWithTank":"")" x="@(tile.Position.X)" y="@(tile.Position.Y)"></div>
                 }
             </div>
             <div id="ShadowTile">
                 @foreach (var tile in Playground.ForegroundTile)
                 {
-                    <div class="item tile @(tile.GetType().Name) @(tile.Layer)" x="@(tile.Position.X)" y="@(tile.Position.Y)" bgx="-@(tile[Playground.Tick]?.StartX)" bgy="-@(tile[Playground.Tick]?.StartY)"></div>
+                    <div @key="tile" class="item tile @(tile.GetType().Name) v@(tile.Variant) @(tile.Layer)" x="@(tile.Position.X)" y="@(tile.Position.Y)"></div>
                 }
             </div>
             <div id="Tank">
                 @if (Playground.PlayerTank is not null)
                 {
-                    <div class="item tank @(Playground.PlayerTank.GetType().Name) @(Playground.PlayerTank.Type) @(Playground.PlayerTank.Enhance) @(Playground.PlayerTank.Direction)" x="@(Playground.PlayerTank.Position.X)" y="@(Playground.PlayerTank.Position.Y)" bgx="-@(Playground.PlayerTank[Playground.Tick]?.StartX)" bgy="-@(Playground.PlayerTank[Playground.Tick]?.StartY)"></div>
+                    <div @key="Playground.PlayerTank" class="item tank @(Playground.PlayerTank.GetType().Name) @(Playground.PlayerTank.Type) @(Playground.PlayerTank.Enhance) @(Playground.PlayerTank.Direction)" x="@(Playground.PlayerTank.Position.X)" y="@(Playground.PlayerTank.Position.Y)"></div>
                 }
             </div>
             <div id="ForegroundTile">
                 @foreach (var tile in Playground.ForegroundTile)
                 {
-                    <div class="item tile @(tile.GetType().Name) @(tile.Layer) @(tile.HitWithTank?"HitWithTank":"")" x="@(tile.Position.X)" y="@(tile.Position.Y)" bgx="-@(tile[Playground.Tick]?.StartX)" bgy="-@(tile[Playground.Tick]?.StartY)"></div>
+                    <div @key="tile" class="item tile @(tile.GetType().Name) v@(tile.Variant) @(tile.Layer) @(tile.HitWithTank?"HitWithTank":"") @(tile.HitWithBullet?"HitWithBullet":"")" x="@(tile.Position.X)" y="@(tile.Position.Y)"></div>
+                }
+            </div>
+            <div id="Bullet">
+                @foreach (var bullet in Playground.Bullet)
+                {
+                    <div @key="bullet" class="item bullet @(bullet.GetType().Name) @(bullet.Direction)" x="@(bullet.Position.X)" y="@(bullet.Position.Y)"></div>
                 }
             </div>
         </div>
@@ -185,8 +191,16 @@
             <div id="StageInformation">@(title)</div>
             <div id="CanvasInformation">
                 <span>FPS:@(fps)</span>
+                <span>TX:@(bpsTx)</span>
+                <br />
                 <span>TPS:@(tps)</span>
-                <span>BPS:@(bpsTx)T,@(bpsRx)R</span>
+                <span>RX:@(bpsRx)</span>
+            </div>
+            <div id="PlayerInformation">
+                <span>Health: @(Playground.PlayerTank?.HealthCount)/@(Playground.PlayerTank?.MaxHealthCount)</span>
+                <span>Speed: @(Playground.PlayerTank?.SpeedLevel)/@(Playground.PlayerTank?.MaxSpeedLevel)</span>
+                <span>Power: @(Playground.PlayerTank?.PowerLevel)/@(Playground.PlayerTank?.MaxPowerLevel)</span>
+                <span>@(Playground.PlayerTank?.SecondaryWeapon.Type): @(Playground.PlayerTank?.SecondaryWeapon.CurrentAmmo)/@(Playground.PlayerTank?.SecondaryWeapon.MaxAmmo)</span>
             </div>
         </div>
 
