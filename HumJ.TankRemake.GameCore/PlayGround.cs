@@ -1,4 +1,5 @@
-﻿using HumJ.TankRemake.GameCore.MapStage.Map;
+﻿using HumJ.TankRemake.GameCore.Base;
+using HumJ.TankRemake.GameCore.MapStage.Map;
 using HumJ.TankRemake.GameCore.MapStage.Tile;
 using HumJ.TankRemake.GameCore.Tank;
 using HumJ.TankRemake.GameCore.Weapon;
@@ -8,7 +9,7 @@ using System.Drawing;
 
 namespace HumJ.TankRemake.GameCore
 {
-    public class Playground(Guid id, ILogger<Playground> logger, ILogger<PlayerTank> ptLogger)
+    public class Playground(Guid id, ILogger<Playground> logger, ILogger<PlayerTank> ptLogger) : IWillPlaySound
     {
         public Guid Id { get; } = id;
 
@@ -31,6 +32,7 @@ namespace HumJ.TankRemake.GameCore
         public ConcurrentBag<BulletBase> Bullet { get; } = [];
 
         public event EventHandler? OnTick;
+        public event EventHandler<string>? OnPlaySound;
 
         private Timer? timer;
 
@@ -65,10 +67,12 @@ namespace HumJ.TankRemake.GameCore
             if (enabled)
             {
                 timer?.Change(0, 0);
+                OnPlaySound?.Invoke(this, "Select");
             }
             else
             {
                 timer?.Change(StageInterval, StageInterval);
+                OnPlaySound?.Invoke(this, "SignIn");
             }
         }
 
@@ -102,8 +106,19 @@ namespace HumJ.TankRemake.GameCore
             }
 
             EnemyTank.Clear();
+            Bullet.Clear();
 
+            if (PlayerTank is not null)
+            {
+                PlayerTank.OnPlaySound -= PlaySound;
+            }
             PlayerTank = new PlayerTank(ptLogger);
+            PlayerTank.OnPlaySound += PlaySound;
+        }
+
+        private void PlaySound(object? sender, string e)
+        {
+            OnPlaySound?.Invoke(sender, e);
         }
 
         private void StartGameTick(int tps = 40)
@@ -121,6 +136,36 @@ namespace HumJ.TankRemake.GameCore
         {
             logger.LogTrace($"{nameof(GoTick)} {Tick}");
 
+            var bulletToRemove = new List<BulletBase>();
+            void RemoveBullet()
+            {
+                if (bulletToRemove.Count > 0)
+                {
+                    var lived = Bullet.Except(bulletToRemove).ToArray();
+                    Bullet.Clear();
+                    foreach (var b in lived)
+                    {
+                        Bullet.Add(b);
+                    }
+                    bulletToRemove.Clear();
+                }
+            }
+
+            var foregroundTileToRemove = new List<TileBase>();
+            void RemoveForegroundTile()
+            {
+                if (foregroundTileToRemove.Count > 0)
+                {
+                    var lived = ForegroundTile.Except(foregroundTileToRemove).ToArray();
+                    ForegroundTile.Clear();
+                    foreach (var t in lived)
+                    {
+                        ForegroundTile.Add(t);
+                    }
+                    foregroundTileToRemove.Clear();
+                }
+            }
+
             try
             {
                 Tick++;
@@ -132,25 +177,36 @@ namespace HumJ.TankRemake.GameCore
 
                 // 子弹
                 {
-                    var removed = new List<BulletBase>();
                     foreach (var bullet in Bullet)
                     {
                         bullet.GoTick(this);
                         if (bullet.TimeToLive < 0)
                         {
-                            removed.Add(bullet);
+                            bulletToRemove.Add(bullet);
                         }
                     }
+                    RemoveBullet();
 
-                    if (removed.Count > 0)
+                    foreach (var bullet in Bullet)
                     {
-                        var lived = Bullet.Except(removed).ToArray();
-                        Bullet.Clear();
-                        foreach (var b in lived)
+                        var hits = ForegroundTile.Where(tile => tile.HitWith(bullet)).ToArray();
+                        var changed = bullet.HitWith(hits);
+                        if (bullet.TimeToLive < 1)
                         {
-                            Bullet.Add(b);
+                            bulletToRemove.Add(bullet);
+                        }
+
+                        foreach (var kv in changed)
+                        {
+                            foregroundTileToRemove.Add(kv.Key);
+                            if (kv.Value != null)
+                            {
+                                ForegroundTile.Add(kv.Value);
+                            }
                         }
                     }
+                    RemoveBullet();
+                    RemoveForegroundTile();
                 }
 
                 OnTick?.Invoke(this, EventArgs.Empty);

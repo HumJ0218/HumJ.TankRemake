@@ -6,7 +6,7 @@ namespace HumJ.TankRemake.GameCore.Weapon
     {
         public override WeaponType Type { get; } = WeaponType.Normal;
         public override int ClipAmmo => 0;
-        public override int MaxAmmo => int.MaxValue;
+        public override int MaxAmmo => 0;
 
         private int lastFireTick = 0;
 
@@ -29,9 +29,9 @@ namespace HumJ.TankRemake.GameCore.Weapon
             var offset = (float)(tank.PowerLevel switch
             {
                 1 => Random.Shared.NextDouble() * 0 - 0,
-                2 => Random.Shared.NextDouble() * 5 - 0.25,
-                3 => Random.Shared.NextDouble() * 10 - 5,
-                4 => Random.Shared.NextDouble() * 15 - 7.5,
+                2 => Random.Shared.NextDouble() * 6 - 3,
+                3 => Random.Shared.NextDouble() * 12 - 6,
+                4 => Random.Shared.NextDouble() * 18 - 9,
                 _ => throw new NotImplementedException(),
             });
 
@@ -52,6 +52,7 @@ namespace HumJ.TankRemake.GameCore.Weapon
             }, tank.Camp);
 
             lastFireTick = playground.Tick;
+            PlaySound("S_Normal");
             return [bullet];
         }
     }

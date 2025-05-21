@@ -51,6 +51,7 @@
         if (firstRender && Playground is not null)
         {
             Playground.OnTick += OnTick;
+            Playground.OnPlaySound += OnPlaySound;
 
             var lastRenderCount = 0;
             var lastTick = Playground.Tick;
@@ -87,6 +88,7 @@
         if (Playground is not null)
         {
             Playground.OnTick -= OnTick;
+            Playground.OnPlaySound -= OnPlaySound;
             Playground?.Stop();
         }
 
@@ -94,10 +96,15 @@
         counterTimer = null;
     }
 
-    private void OnTick(object? sender, EventArgs args)
+    private void OnTick(object? sender, EventArgs e)
     {
         shouldRender = true;
         InvokeAsync(StateHasChanged);
+    }
+
+    private void OnPlaySound(object? sender, string e)
+    {
+        _ = JSRuntime.InvokeVoidAsync("eval", $"{e}.currentTime=0;{e}.play()");
     }
 
     private async Task PauseAsync(bool enabled)
@@ -149,6 +156,7 @@
 @if (Playground is not null)
 {
     <div id="Playground" data-tick="@(Playground.Tick)">
+        <AudioEffect />
         <div id="Canvas" tabindex="-1" @onfocus="ev=>PauseAsync(false)" @onblur="ev=>PauseAsync(true)" @onkeydown="ev=>KeyAsync(ev)" @onkeyup="ev=>KeyAsync(ev)">
             <div id="Background" style="background-color:@($"rgb({Playground.BackgroundColor.R},{Playground.BackgroundColor.G},{Playground.BackgroundColor.B})");background-image:url(@(Playground.BackgroundImage));"></div>
             <div id="BackgroundTile">

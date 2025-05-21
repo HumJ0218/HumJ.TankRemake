@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace HumJ.TankRemake.GameCore.Weapon
 {
-    public class BulletApGun(Vector2 position, EntityDirection direction, Vector2 speed,Camp camp) : BulletBase(position, direction, speed, 60, camp)
+    public class BulletApGun(Vector2 position, EntityDirection direction, Vector2 speed, Camp camp,int damage) : BulletBase(position, direction, speed, 60, camp, damage)
     {
         public override WeaponType Type => WeaponType.Ap;
 

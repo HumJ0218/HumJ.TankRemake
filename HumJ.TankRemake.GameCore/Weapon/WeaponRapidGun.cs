@@ -13,7 +13,7 @@ namespace HumJ.TankRemake.GameCore.Weapon
         {
             if (CurrentAmmo < 1)
             {
-                return [];
+                return tank.PrimaryWeapon.Fire(tank, playground);
             }
 
             var fireInterval = tank.SpeedLevel switch
@@ -70,6 +70,7 @@ namespace HumJ.TankRemake.GameCore.Weapon
             }
 
             lastFireTick = playground.Tick;
+            PlaySound("S_Rapid");
             return [bullet];
         }
     }

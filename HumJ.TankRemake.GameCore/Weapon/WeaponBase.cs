@@ -1,9 +1,10 @@
-﻿using HumJ.TankRemake.GameCore.Tank;
+﻿using HumJ.TankRemake.GameCore.Base;
+using HumJ.TankRemake.GameCore.Tank;
 using System.Numerics;
 
 namespace HumJ.TankRemake.GameCore.Weapon
 {
-    public abstract class WeaponBase
+    public abstract class WeaponBase: IWillPlaySound
     {
         protected WeaponBase()
         {
@@ -14,6 +15,12 @@ namespace HumJ.TankRemake.GameCore.Weapon
         public abstract int ClipAmmo { get; }
         public virtual int MaxAmmo => ClipAmmo * 5;
         public int CurrentAmmo { get; protected set; }
+
+        public event EventHandler<string>? OnPlaySound;
+        protected void PlaySound(string sound)
+        {
+            OnPlaySound?.Invoke(this, sound);
+        }
 
         public abstract BulletBase[] Fire(TankBase tank, Playground playground);
 

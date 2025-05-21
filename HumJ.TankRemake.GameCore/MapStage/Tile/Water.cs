@@ -1,4 +1,5 @@
 ﻿using HumJ.TankRemake.GameCore.Tank;
+using HumJ.TankRemake.GameCore.Weapon;
 
 namespace HumJ.TankRemake.GameCore.MapStage.Tile
 {

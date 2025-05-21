@@ -28,10 +28,13 @@ namespace HumJ.TankRemake.GameCore.MapStage.Tile
             return HitWithTank;
         }
 
-        public virtual bool HitWith(BulletBase bullet)
+        public bool HitWith(BulletBase bullet)
         {
             HitWithBullet = HitBox.IntersectsWith(bullet.HitBox);
+
             return HitWithBullet;
         }
+
+        public virtual (int Damaged, TileBase? ChangeTo) DamageBy(BulletBase bullet) => (0, this);
     }
 }

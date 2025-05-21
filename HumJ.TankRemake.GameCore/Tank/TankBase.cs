@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace HumJ.TankRemake.GameCore.Tank
 {
-    public abstract class TankBase(ILogger<TankBase> logger) : ICanGoTick, IHaveControl<TankControl>, IHaveHitBox
+    public abstract class TankBase(ILogger<TankBase> logger) : ICanGoTick, IHaveControl<TankControl>, IHaveHitBox, IWillPlaySound
     {
         public const int GridSize = 16;
         public static readonly RectangleF MoveBound = new(GridSize, GridSize, GridSize * 38, GridSize * 28);
@@ -44,8 +44,27 @@ namespace HumJ.TankRemake.GameCore.Tank
 
         public abstract bool Injured { get; }
         public abstract TankType Type { get; }
-        public virtual WeaponBase PrimaryWeapon { get; protected set; }
-        public virtual WeaponBase SecondaryWeapon { get; protected set; }
+        public virtual WeaponBase PrimaryWeapon
+        {
+            get => pw; protected set
+            {
+                if (pw is not null) pw.OnPlaySound -= PlaySound;
+                pw = value;
+                pw.OnPlaySound += PlaySound;
+            }
+        }
+        public virtual WeaponBase SecondaryWeapon
+        {
+            get => sw; protected set
+            {
+                if (sw is not null) sw.OnPlaySound -= PlaySound;
+                sw = value;
+                sw.OnPlaySound += PlaySound;
+            }
+        }
+
+        private WeaponBase pw=null!;
+        private WeaponBase sw=null!;
 
         public abstract int MaxHealthCount { get; }
         public abstract int MaxAmmoCount { get; }
@@ -60,6 +79,12 @@ namespace HumJ.TankRemake.GameCore.Tank
         public abstract int SpeedLevel { get; }
         public abstract int PowerLevel { get; }
         public abstract EnhanceType Enhance { get; }
+
+        public event EventHandler<string>? OnPlaySound;
+        private void PlaySound(object? sender, string sound)
+        {
+            OnPlaySound?.Invoke(sender, sound);
+        }
 
         private readonly Dictionary<TankControl, bool> control = new()
         {
